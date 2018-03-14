@@ -6,27 +6,27 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import "CallDetectionManager.h"
+#import "RNCallDetection.h"
 @import CoreTelephony;
 
 typedef void (^CallBack)();
-@interface CallDetectionManager()
+@interface RNCallDetection()
 
 @property(strong, nonatomic) RCTResponseSenderBlock block;
 @property(strong, nonatomic, nonnull) CTCallCenter *callCenter;
 
 @end
 
-@implementation CallDetectionManager
+@implementation RNCallDetection
 
 - (NSDictionary *)eventNameMap
 {
-  return @{
-   CTCallStateConnected    : @"Connected",
-   CTCallStateDialing      : @"Dialing",
-   CTCallStateDisconnected : @"Disconnected",
-   CTCallStateIncoming     : @"Incoming"
-   };
+    return @{
+             CTCallStateConnected    : @"Connected",
+             CTCallStateDialing      : @"Dialing",
+             CTCallStateDisconnected : @"Disconnected",
+             CTCallStateIncoming     : @"Incoming"
+             };
 }
 
 - (NSDictionary *)constantsToExport
@@ -46,13 +46,13 @@ typedef void (^CallBack)();
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(addCallBlock:(RCTResponseSenderBlock) block) {
-  // Setup call tracking
-  self.block = block;
-  self.callCenter = [[CTCallCenter alloc] init];
-  __typeof(self) weakSelf = self;
-  self.callCenter.callEventHandler = ^(CTCall *call) {
-    [weakSelf handleCall:call];
-  };
+    // Setup call tracking
+    self.block = block;
+    self.callCenter = [[CTCallCenter alloc] init];
+    __typeof(self) weakSelf = self;
+    self.callCenter.callEventHandler = ^(CTCall *call) {
+        [weakSelf handleCall:call];
+    };
 }
 
 RCT_EXPORT_METHOD(startListener) {
@@ -72,7 +72,7 @@ RCT_EXPORT_METHOD(stopListener) {
 RCT_EXPORT_METHOD(currentCalls:(RCTResponseSenderBlock)_callback) {
     CTCallCenter *ctCallCenter = [[CTCallCenter alloc] init]; // using my own callCenter to avoid interferrence with event listeners
     NSMutableArray<NSDictionary *> *calls = [[NSMutableArray alloc] init];
-
+    
     for (CTCall *currentCall in ctCallCenter.currentCalls) {
         [calls addObject:@{@"callID": currentCall.callID, @"callState": [self.eventNameMap objectForKey: currentCall.callState ]}];
     }
@@ -81,13 +81,14 @@ RCT_EXPORT_METHOD(currentCalls:(RCTResponseSenderBlock)_callback) {
 
 - (void)handleCall:(CTCall *)call {
     _callCenter = [[CTCallCenter alloc] init];
-
+    
     [_callCenter setCallEventHandler:^(CTCall *call) {
         [self sendEventWithName:@"PhoneCallStateUpdate"
-                                                     body:[self.eventNameMap objectForKey: call.callState]];
+                           body:[self.eventNameMap objectForKey: call.callState]];
     }];
     [self sendEventWithName:@"PhoneCallStateUpdate"
-                                                     body:[self.eventNameMap objectForKey: call.callState]];
+                       body:[self.eventNameMap objectForKey: call.callState]];
 }
 
 @end
+

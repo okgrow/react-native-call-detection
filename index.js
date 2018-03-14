@@ -11,7 +11,7 @@ export const permissionDenied = 'PERMISSION DENIED'
 
 const BatchedBridge = require('react-native/Libraries/BatchedBridge/BatchedBridge')
 
-const NativeCallDetector = NativeModules.CallDetectionManager
+const NativeCallDetector = NativeModules.RNCallDetection
 const NativeCallDetectorAndroid = NativeModules.CallDetectionManagerAndroid
 
 var CallStateUpdateActionModule = require('./CallStateUpdateActionModule')
